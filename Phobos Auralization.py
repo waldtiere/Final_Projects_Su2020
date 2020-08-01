@@ -136,11 +136,12 @@ def plot_data(DataFrame, title, ps, pe, columns: list):
     idx = 0
     colors = ['blue', 'red', 'green', 'black']
     for c in columns:
-            DataFrame[ps:pe].plot(kind='line',y=c, color=colors[idx], ax=ax, fontsize=5, title=title)
+            DataFrame[ps:pe].plot(kind='line',y=c, color=colors[idx], ax=ax, fontsize=4, title=title)
             idx+=1
 
+
+    plt.savefig('{}.jpg'.format(title))
     plt.show()
-    plt.savefig('{}.pdf'.format(title))
 
 
 
