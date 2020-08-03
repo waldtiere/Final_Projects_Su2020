@@ -135,14 +135,40 @@ def plot_data(DataFrame, title, ps, pe, columns: list):
     ax = plt.gca()
     idx = 0
     colors = ['blue', 'red', 'green', 'black']
+    plot_titles = title.split('/')
+    plot_title = plot_titles[1]
+
     for c in columns:
-            DataFrame[ps:pe].plot(kind='line',y=c, color=colors[idx], ax=ax, fontsize=4, title=title)
+            DataFrame[ps:pe].plot(kind='line',y=c, color=colors[idx], ax=ax, fontsize=4, title=plot_title)
             idx+=1
 
 
     plt.savefig('{}.jpg'.format(title))
     plt.show()
 
+
+def plot_single_data(DataFrame, title, ps, pe, columns: list, color):
+    """
+    This plots a line plot of the columns of a dataframe with up to 4 columns.  You can indicate exactly which colums you want to plot
+    as well as the start and end points of each plot in the case you want to show a smaller slice of the dataframe.
+
+    :param DataFrame: The dataFrame to plot
+    :param title: Title of the Plot
+    :param ps: Point Start (the first point of a slice)
+    :param pe: Point End (the last point of a slice)
+    :param columns: a list of which columns you want to plot as strings.
+    :return: Displays the desired Output Plot
+    """
+
+    ax = plt.gca()
+    plot_titles = title.split('/')
+    plot_title = plot_titles[1]
+    DataFrame[ps:pe].plot(kind='line',y=columns[0], color=color, ax=ax, fontsize=4, title=plot_title)
+
+
+
+    plt.savefig('{}.jpg'.format(title))
+    plt.show()
 
 
 def make_waves(wave_array, filename: str, num_cycle=1):
@@ -185,6 +211,9 @@ def find_zero_points(DataSeries, column):
     zero_indexes = np.where(abs(wave_list[:-1] - wave_list[1:]) > abs(wave_list[:-1]))[0]
     print(zero_indexes)
     odd_zero_indexes = np.where((zero_indexes[:-1] + 1) != zero_indexes[1:])[0]
+    if len(odd_zero_indexes) < 3:
+        print('Single Wave Cycle Not Found')
+        return [0, -1]
     odd_zero_indexes = zero_indexes[odd_zero_indexes]
     print(odd_zero_indexes)
     if odd_zero_indexes[2] - odd_zero_indexes[0] > 900:
@@ -275,14 +304,14 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     zpm2 = zero_points_M[1]
 
     # plot the four sampled out full waveforms
-    plot_data(amp_M[column_names[0]][zpx1:zpx2], 'image/{0}-Mean as Amplitude Normalized One Cycle_1'.format(identifier),
-              0, data_length, (column_names[0]))
-    plot_data(amp_M[column_names[1]][zpy1:zpy2], 'image/{0}-Mean as Amplitude Normalized One Cycle_2'.format(identifier),
-              0, data_length, (column_names[1]))
-    plot_data(amp_M[column_names[2]][zpz1:zpz2], 'image/{0}-Mean as Amplitude Normalized One Cycle_3'.format(identifier),
-              0, data_length, (column_names[2]))
-    plot_data(amp_M['M'][zpm1:zpm2], 'image/{0}-Mean as Amplitude Normalized One Cycle_mean'.format(identifier),
-              0, data_length, 'M')
+    plot_single_data(amp_M[column_names[0]][zpx1:zpx2], 'image/{0}-Mean as Amplitude Normalized One Cycle_1'.format(identifier),
+              0, data_length, (column_names[0]),'Blue')
+    plot_single_data(amp_M[column_names[1]][zpy1:zpy2], 'image/{0}-Mean as Amplitude Normalized One Cycle_2'.format(identifier),
+              0, data_length, (column_names[1]),'Red')
+    plot_single_data(amp_M[column_names[2]][zpz1:zpz2], 'image/{0}-Mean as Amplitude Normalized One Cycle_3'.format(identifier),
+              0, data_length, (column_names[2]),'Green')
+    plot_single_data(amp_M['M'][zpm1:zpm2], 'image/{0}-Mean as Amplitude Normalized One Cycle_mean'.format(identifier),
+              0, data_length, 'M','Black')
 
     # create a continuous repeated tone out of each sampled wave
     make_waves(amp_M[column_names[0]][zpx1:zpx2], "sound/{0} 1cycle_1.wav".format(identifier), 50)
@@ -302,8 +331,49 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     make_waves(amp_M[column_names[2]][zpz1:zpz2:30], "sound/{0} 1cycle_3_highest.wav".format(identifier), 5000)
     make_waves(amp_M['M'][zpm1:zpm2:30], "sound/{0} 1cycle_mean_highest.wav".format(identifier), 5000)
 
+# create a non-repeating single cyle wave for use by MAX/MSP
+    make_waves(amp_M[column_names[0]][zpx1:zpx2], "sound/for_max/{0} 1cycle_1_single.wav".format(identifier))
+    make_waves(amp_M[column_names[1]][zpy1:zpy2], "sound/for_max/{0} 1cycle_2_single.wav".format(identifier))
+    make_waves(amp_M[column_names[2]][zpz1:zpz2], "sound/for_max/{0} 1cycle_3_single.wav".format(identifier))
+    make_waves(amp_M['M'][zpm1:zpm2], "sound/for_max/{0} 1cycle_mean_single.wav".format(identifier))
 
 
-# call main function
+# CALL THE MAIN FUNCTION BELOW.
+"""
+How to call:  
 
-plots_and_waves('ParkerSolarProbe.txt', 'Parker Velocity', 'VX=|VY=|VZ=', 'V', ['VX', 'VY', 'VZ'], 2000)
+The proram can be called by simply replacing the default parameters below with your own parameters.  
+
+plots_and_waves(datafile, identifier, delimiters, first_char, column_names, data_inc=500):
+ make sure to check the origial datafile you are using to make sure it is a JPL Horizons datafile.  Lines will be formatted like so:
+
+2458343.500000000 = A.D. 2018-Aug-13 00:00:00.0000 TDB 
+ X =-3.126133124396237E-03 Y =-3.561447762865196E-03 Z =-6.934630025140552E-04
+ VX=-4.618261087536135E-03 VY=-5.370670708376926E-03 VZ=-9.784335339083530E-04
+ LT= 2.766075923986267E-05 RG= 4.789311998076623E-03 RR= 7.149914144709729E-03
+2458343.541666667 = A.D. 2018-Aug-13 01:00:00.0000 TDB 
+ X =-3.318537227417918E-03 Y =-3.785200789771382E-03 Z =-7.342262242201711E-04
+ VX=-4.617155482195074E-03 VY=-5.369496986640906E-03 VZ=-9.782056435918771E-04
+ LT= 2.938117068112179E-05 RG= 5.087192005121990E-03 RR= 7.148354295757034E-03
+etc.............
+
+You may only extract the values from one row and must extract all 3 values from each row.  
+to exract the X,Y and Z positoin data in this example: 
+delimiter = 'X =|Y =|Z ='
+first_char = 'X'
+column_names = ['X ', 'Y ', 'Z ']
+
+do extract the VX, VY, and VZ velocity data:
+delimiter = 'VX=|VY=|VZ='
+first_char = 'V'
+column_names = ['VX', 'VY', 'VZ']
+
+note that each individual entry in "delimiter" and each string in the "colunm_name"
+list require two spaces wtih the second space left blank in the case of a single character
+item. 
+
+The last arguement "data_inc" only affects the size of the "samples" that are plotted.  
+"""
+
+
+plots_and_waves('ParkerSolarProbe.txt', 'Parker Velocities', 'VX=|VY=|VZ=', 'V', ['VX', 'VY', 'VZ'], 2000)
