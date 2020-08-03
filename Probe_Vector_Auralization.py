@@ -23,7 +23,8 @@ import matplotlib.pyplot as plt
 import wave, struct, math, random, matplotlib
 
 def create_dict_from_file(filename, delimeters, first_char, column_names):
-    """This function takes in a filename of an output file from the Horizons On-line
+    """
+    This function takes in a filename of an output file from the Horizons On-line
     Ephemeris System v4.70 (Solar System Dynamics Group Jet Propulsion Laboratory
     Pasadena, CA, USA) and creates a list of dictionaries from it with the relevant information
     needed to create arrays from each element in the file format. It prints relevant data to the
@@ -31,7 +32,18 @@ def create_dict_from_file(filename, delimeters, first_char, column_names):
     dictionary as the value before returning it to the main.  This function is adapted from the
     hurdat2_create_dict_from_file() function originated by 590PR Summer 2020 students Grace Spiewak,
     Ryan Ingebitsen, David Mendoza and modifed for this project by Ryan Ingebritsen.
-"""
+
+    >>> filetest = create_dict_from_file('sound/Parker Measurements 1cycle_1.wav', 'X =|Y =|Z =', 'X', ['X ', 'Y ', 'Z '])
+    Input File Must Be a .txt File
+    >>> filetest = create_dict_from_file('ParkerSolarProbe.txt', 'X |Y =|Z ', 'X', ['X ', 'Y', 'Z '])
+    Please Check Syntax for Delimeters and colunm_names.
+    >>> filetest = create_dict_from_file('ParkerSolarProbe.txt', 'X =|Y =|Z =', 'X', ['X ', 'Y ', 'Z '])
+    >>> print(len(filetest))
+    16801
+    >>> print(filetest['2458343.500000000'])
+    {'X ': -0.003126133124396237, 'Y ': -0.003561447762865196, 'Z ': -0.0006934630025140552}
+
+    """
 
 # This opens the
     measurement_output = open('measurement_output.txt', "w", encoding="utf8")
@@ -39,44 +51,67 @@ def create_dict_from_file(filename, delimeters, first_char, column_names):
     measurements_file_container = {}
 
     # This opens the file and then splits it (preserving the commas because of the landfall count requirement).
-    with open(filename, 'r') as infile:
-        for line in infile:
-            line = line.strip()
-            # This checks to see if line begins with a numeric character; if so, it is a header for a new measurement.
-            if line[0].isnumeric():
-                measurement_current_line = line.split()
-                # This initializes a new measurement dictionary
-                key = measurement_current_line[0]
-                new_measurement_dictionary = {
-                    column_names[0]: '0',
-                    column_names[1]: '0',
-                    column_names[2]: '0',
-                }
-                print(measurement_current_line)
-                # this determines if a line starts with 'X', splits it at the X =,Y =,Z = indicators
-                # to spit out a list containing only the 3 values and then updates the corresponding
-                # value in the dictionary
-            if line[0] == first_char:
-                measurement_current_line = re.split(delimeters, line.strip(' '))
-                print(measurement_current_line)
-                if len(measurement_current_line) == 4:
-                    new_measurement_dictionary[column_names[0]] = float(measurement_current_line[1].strip())
-                    new_measurement_dictionary[column_names[1]] = float(measurement_current_line[2].strip())
-                    new_measurement_dictionary[column_names[2]] = float(measurement_current_line[3].strip())
-                    measurements_file_container[key] = new_measurement_dictionary
-                    print(new_measurement_dictionary)
-                # this stops the processing when the end of data key '$$EOE' is reached
-            elif line == '$$EOE':
-                break
+    if not filename.endswith('.txt'):
+        print('Input File Must Be a .txt File')
+        return None
+    elif delimeters != '{}=|{}=|{}='.format(column_names[0], column_names[1], column_names[2]):
+        print('Please Check Syntax for Delimeters and colunm_names.')
+        return None
+    else:
+        with open(filename, 'r') as infile:
+            for line in infile:
+                line = line.strip()
+                # This checks to see if line begins with a numeric character; if so, it is a header for a new measurement.
+                if line[0].isnumeric():
+                    measurement_current_line = line.split()
+                    # This initializes a new measurement dictionary
+                    key = measurement_current_line[0]
+                    new_measurement_dictionary = {
+                        column_names[0]: '0',
+                        column_names[1]: '0',
+                        column_names[2]: '0',
+                    }
+                    #print(measurement_current_line)
+                    # this determines if a line starts with 'X', splits it at the X =,Y =,Z = indicators
+                    # to spit out a list containing only the 3 values and then updates the corresponding
+                    # value in the dictionary
+                if line[0] == first_char:
+                    measurement_current_line = re.split(delimeters, line.strip(' '))
+                    #print(measurement_current_line)
+                    if len(measurement_current_line) == 4:
+                        new_measurement_dictionary[column_names[0]] = float(measurement_current_line[1].strip())
+                        new_measurement_dictionary[column_names[1]] = float(measurement_current_line[2].strip())
+                        new_measurement_dictionary[column_names[2]] = float(measurement_current_line[3].strip())
+                        measurements_file_container[key] = new_measurement_dictionary
+                        #print(new_measurement_dictionary)
+                    # this stops the processing when the end of data key '$$EOE' is reached
+                elif line == '$$EOE':
+                    break
 
-    print(measurements_file_container)
-    return(measurements_file_container)
+            #print(measurements_file_container)
+            return(measurements_file_container)
 
 
 # This ruins converts the dictionary resulting from "create dict from filename" into a
 # pd.DataFrame with the time ID for each measurement as the Index and the values of X, Y,
 # and Z as each column respectively
 def convert_measuerment_dict_to_DataFrame(measurement_dict):
+    """
+    simple conversion of dictionary to dataframe
+
+    :param measurement_dict:
+    :return: dataframe form measurement dictionary
+
+    >>> filetest = create_dict_from_file('ParkerSolarProbe.txt', 'X =|Y =|Z =', 'X', ['X ', 'Y ', 'Z '])
+    >>> dataframe_test = convert_measuerment_dict_to_DataFrame(filetest)
+    >>> print(len(dataframe_test))
+    16801
+    >>> print(dataframe_test.dtypes)
+    X     float64
+    Y     float64
+    Z     float64
+    dtype: object
+    """
     df = pd.DataFrame.from_dict(measurement_dict, orient='index')
     return(df)
 
@@ -87,6 +122,20 @@ def convert_coordinates_to_amplitude(measurement_DataFrame):
     the min.  This will later be used to scale the value to a value from -32767 to 32767
     :param measurement_DataFrame:
     :return: measurement_DataFrame transformed into amplitude data for .wav file
+    >>> list = [1.5, 2.1, 3.3, 2.2, 3.4, 3.1, 1.45, 0.8]
+    >>> df_test = pd.DataFrame(list,columns=['X'])
+    >>> amp_df = convert_coordinates_to_amplitude(df_test)
+    >>> print(amp_df)
+           X
+    0 -15123
+    1      0
+    2  30246
+    3   2520
+    4  32766
+    5  25205
+    6 -16383
+    7 -32767
+
     """
     for c in measurement_DataFrame:
         range = abs(measurement_DataFrame[c].max() - measurement_DataFrame[c].min())
@@ -94,8 +143,7 @@ def convert_coordinates_to_amplitude(measurement_DataFrame):
         func = lambda x: int((65534 / range) * (x + data_offset))
         measurement_DataFrame[c] = measurement_DataFrame[c].apply(func)
     return measurement_DataFrame
-        
-        # offset = -(max + min)/2
+
 
 def get_mean_wav(DataFrame):
     """
@@ -114,6 +162,13 @@ def get_correlation(df):
     It returns the correlation between the two columns.
     :param df: DataFrame to use, c1: First Column to compare, c2: Second Column to Compare
     :return: corrlation between two columns in the Dataframe
+
+    >>> df = pd.DataFrame({'one':   {'one': 1, 'two': 2, 'three': 3}, 'two':   {'one':1, 'two':2, 'three':3}, 'three': {'one':1, 'two':2, 'three':3}})
+    >>> get_correlation(df)
+           one  two  three
+    one    1.0  1.0    1.0
+    two    1.0  1.0    1.0
+    three  1.0  1.0    1.0
     """
     frame_correlation = df.corr()
     return frame_correlation
@@ -205,24 +260,35 @@ def find_zero_points(DataSeries, column):
     :param DataSeries: the data series to analize
     :column to look for zero point
     :return: list of numbers that represent the first two zero points in the dataset
+    >>> filetest = create_dict_from_file('ParkerSolarProbe.txt', 'X =|Y =|Z =', 'X', ['X ', 'Y ', 'Z '])
+    >>> dataframe_test = convert_measuerment_dict_to_DataFrame(filetest)
+    >>> amp_test = convert_coordinates_to_amplitude(dataframe_test)
+    >>> find_zero_points(amp_test, 'X ')
+    [2985, 11184]
+    >>> filetest = create_dict_from_file('Phobos2018-Jan-02.txt', 'X =|Y =|Z =', 'X', ['X ', 'Y ', 'Z '])
+    >>> dataframe_test = convert_measuerment_dict_to_DataFrame(filetest)
+    >>> amp_test = convert_coordinates_to_amplitude(dataframe_test)
+    >>> find_zero_points(amp_test, 'X ')
+    Single Wave Cycle Not Found
+    [0, -1]
     """
 
     wave_list = np.array(DataSeries[column])
     zero_indexes = np.where(abs(wave_list[:-1] - wave_list[1:]) > abs(wave_list[:-1]))[0]
-    print(zero_indexes)
+    #print(zero_indexes)
     odd_zero_indexes = np.where((zero_indexes[:-1] + 1) != zero_indexes[1:])[0]
     if len(odd_zero_indexes) < 3:
         print('Single Wave Cycle Not Found')
         return [0, -1]
     odd_zero_indexes = zero_indexes[odd_zero_indexes]
-    print(odd_zero_indexes)
+    #print(odd_zero_indexes)
     if odd_zero_indexes[2] - odd_zero_indexes[0] > 900:
         indexes = [odd_zero_indexes[0], odd_zero_indexes[2]]
     elif odd_zero_indexes[4] - odd_zero_indexes[2] > 900:
         indexes = [odd_zero_indexes[2], odd_zero_indexes[4]]
     else:
         indexes = [odd_zero_indexes[0], odd_zero_indexes[4]]
-    print(indexes)
+    #print(indexes)
     return indexes
 
 
@@ -339,41 +405,43 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
 
 
 # CALL THE MAIN FUNCTION BELOW.
-"""
-How to call:  
 
-The proram can be called by simply replacing the default parameters below with your own parameters.  
+if __name__ == '__main__':
+    """
+    How to call:  
+    
+    The proram can be called by simply replacing the default parameters below with your own parameters.  
+    
+    plots_and_waves(datafile, identifier, delimiters, first_char, column_names, data_inc=500):
+     make sure to check the origial datafile you are using to make sure it is a JPL Horizons datafile.  Lines will be formatted like so:
+    
+    2458343.500000000 = A.D. 2018-Aug-13 00:00:00.0000 TDB 
+     X =-3.126133124396237E-03 Y =-3.561447762865196E-03 Z =-6.934630025140552E-04
+     VX=-4.618261087536135E-03 VY=-5.370670708376926E-03 VZ=-9.784335339083530E-04
+     LT= 2.766075923986267E-05 RG= 4.789311998076623E-03 RR= 7.149914144709729E-03
+    2458343.541666667 = A.D. 2018-Aug-13 01:00:00.0000 TDB 
+     X =-3.318537227417918E-03 Y =-3.785200789771382E-03 Z =-7.342262242201711E-04
+     VX=-4.617155482195074E-03 VY=-5.369496986640906E-03 VZ=-9.782056435918771E-04
+     LT= 2.938117068112179E-05 RG= 5.087192005121990E-03 RR= 7.148354295757034E-03
+    etc.............
+    
+    You may only extract the values from one row and must extract all 3 values from each row.  
+    to exract the X,Y and Z positoin data in this example: 
+    delimiter = 'X =|Y =|Z ='
+    first_char = 'X'
+    column_names = ['X ', 'Y ', 'Z ']
+    
+    do extract the VX, VY, and VZ velocity data:
+    delimiter = 'VX=|VY=|VZ='
+    first_char = 'V'
+    column_names = ['VX', 'VY', 'VZ']
+    
+    note that each individual entry in "delimiter" and each string in the "colunm_name"
+    list require two spaces wtih the second space left blank in the case of a single character
+    item. 
+    
+    The last arguement "data_inc" only affects the size of the "samples" that are plotted.  
+    """
 
-plots_and_waves(datafile, identifier, delimiters, first_char, column_names, data_inc=500):
- make sure to check the origial datafile you are using to make sure it is a JPL Horizons datafile.  Lines will be formatted like so:
 
-2458343.500000000 = A.D. 2018-Aug-13 00:00:00.0000 TDB 
- X =-3.126133124396237E-03 Y =-3.561447762865196E-03 Z =-6.934630025140552E-04
- VX=-4.618261087536135E-03 VY=-5.370670708376926E-03 VZ=-9.784335339083530E-04
- LT= 2.766075923986267E-05 RG= 4.789311998076623E-03 RR= 7.149914144709729E-03
-2458343.541666667 = A.D. 2018-Aug-13 01:00:00.0000 TDB 
- X =-3.318537227417918E-03 Y =-3.785200789771382E-03 Z =-7.342262242201711E-04
- VX=-4.617155482195074E-03 VY=-5.369496986640906E-03 VZ=-9.782056435918771E-04
- LT= 2.938117068112179E-05 RG= 5.087192005121990E-03 RR= 7.148354295757034E-03
-etc.............
-
-You may only extract the values from one row and must extract all 3 values from each row.  
-to exract the X,Y and Z positoin data in this example: 
-delimiter = 'X =|Y =|Z ='
-first_char = 'X'
-column_names = ['X ', 'Y ', 'Z ']
-
-do extract the VX, VY, and VZ velocity data:
-delimiter = 'VX=|VY=|VZ='
-first_char = 'V'
-column_names = ['VX', 'VY', 'VZ']
-
-note that each individual entry in "delimiter" and each string in the "colunm_name"
-list require two spaces wtih the second space left blank in the case of a single character
-item. 
-
-The last arguement "data_inc" only affects the size of the "samples" that are plotted.  
-"""
-
-
-plots_and_waves('ParkerSolarProbe.txt', 'Parker Velocities', 'VX=|VY=|VZ=', 'V', ['VX', 'VY', 'VZ'], 2000)
+    plots_and_waves('ParkerSolarProbe.txt', 'Parker Velocities', 'VX=|VY=|VZ=', 'V', ['VX', 'VY', 'VZ'], 2000)
