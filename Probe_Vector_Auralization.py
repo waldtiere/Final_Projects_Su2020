@@ -4,7 +4,7 @@ Phobos Auralization Projet
 Final Project for IS590PR
 Programming for Data Analysis
 
-Professor John Weible
+Instructor John Weible
 
 Contributors:
 
@@ -20,18 +20,19 @@ import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import wave, struct, math, random, matplotlib
+import wave, struct
 
 def create_dict_from_file(filename, delimeters, first_char, column_names):
     """
-    This function takes in a filename of an output file from the Horizons On-line
+        This function takes in a filename of an output file from the Horizons On-line
     Ephemeris System v4.70 (Solar System Dynamics Group Jet Propulsion Laboratory
     Pasadena, CA, USA) and creates a list of dictionaries from it with the relevant information
     needed to create arrays from each element in the file format. It prints relevant data to the
     console and then creates a nested dictionary with a Measurement Date as key and its existing
     dictionary as the value before returning it to the main.  This function is adapted from the
     hurdat2_create_dict_from_file() function originated by 590PR Summer 2020 students Grace Spiewak,
-    Ryan Ingebitsen, David Mendoza and modifed for this project by Ryan Ingebritsen.
+    Ryan Ingebitsen, David Mendoza and modified for this project by Ryan Ingebritsen.
+
 
     >>> filetest = create_dict_from_file('sound/Parker Measurements 1cycle_1.wav', 'X =|Y =|Z =', 'X', ['X ', 'Y ', 'Z '])
     Input File Must Be a .txt File
@@ -45,9 +46,9 @@ def create_dict_from_file(filename, delimeters, first_char, column_names):
 
     """
 
-# This opens the
+    # This opens the
     measurement_output = open('measurement_output.txt', "w", encoding="utf8")
-    # This creates and initializes a list to  serve as a dictionary container outside of the for-loop.
+    # This creates and initializes a list to serve as a dictionary container outside of the for-loop.
     measurements_file_container = {}
 
     # This opens the file and then splits it (preserving the commas because of the landfall count requirement).
@@ -64,7 +65,7 @@ def create_dict_from_file(filename, delimeters, first_char, column_names):
                 # This checks to see if line begins with a numeric character; if so, it is a header for a new measurement.
                 if line[0].isnumeric():
                     measurement_current_line = line.split()
-                    # This initializes a new measurement dictionary
+                    # This initializes a new measurement dictionary with the 3 items in column_names
                     key = measurement_current_line[0]
                     new_measurement_dictionary = {
                         column_names[0]: '0',
@@ -77,27 +78,26 @@ def create_dict_from_file(filename, delimeters, first_char, column_names):
                     # value in the dictionary
                 if line[0] == first_char:
                     measurement_current_line = re.split(delimeters, line.strip(' '))
-                    #print(measurement_current_line)
                     if len(measurement_current_line) == 4:
                         new_measurement_dictionary[column_names[0]] = float(measurement_current_line[1].strip())
                         new_measurement_dictionary[column_names[1]] = float(measurement_current_line[2].strip())
                         new_measurement_dictionary[column_names[2]] = float(measurement_current_line[3].strip())
                         measurements_file_container[key] = new_measurement_dictionary
-                        #print(new_measurement_dictionary)
-                    # this stops the processing when the end of data key '$$EOE' is reached
+                    # this stops the processing when the end of data key '$$EOE' is reached.
                 elif line == '$$EOE':
                     break
 
-            #print(measurements_file_container)
+
             return(measurements_file_container)
 
 
-# This ruins converts the dictionary resulting from "create dict from filename" into a
-# pd.DataFrame with the time ID for each measurement as the Index and the values of X, Y,
-# and Z as each column respectively
+
 def convert_measuerment_dict_to_DataFrame(measurement_dict):
     """
     simple conversion of dictionary to dataframe
+    This converts the dictionary resulting from create_dict_from_filename" into a
+    pd.DataFrame with the time ID for each measurement as the Index and the values of X, Y,
+    and Z as each column respectively
 
     :param measurement_dict:
     :return: dataframe form measurement dictionary
@@ -119,7 +119,8 @@ def convert_measuerment_dict_to_DataFrame(measurement_dict):
 def convert_coordinates_to_amplitude(measurement_DataFrame):
     """
     this defines the minimum and maximum range of each column by subtracing the max from
-    the min.  This will later be used to scale the value to a value from -32767 to 32767
+    the min.  It also calculates the offset from the zero point and adjusts each data point by adding the offset.
+     This then scales the value to a value from -32767 to 32767
     :param measurement_DataFrame:
     :return: measurement_DataFrame transformed into amplitude data for .wav file
     >>> list = [1.5, 2.1, 3.3, 2.2, 3.4, 3.1, 1.45, 0.8]
@@ -176,7 +177,7 @@ def get_correlation(df):
 
 def plot_data(DataFrame, title, ps, pe, columns: list):
     """
-    This plots a line plot of the columns of a dataframe with up to 4 columns.  You can indicate exactly which colums you want to plot
+    This plots a line plot of the columns of a DataFrame with up to 4 columns.  You can indicate exactly which columns you want to plot
     as well as the start and end points of each plot in the case you want to show a smaller slice of the dataframe.
 
     :param DataFrame: The dataFrame to plot
@@ -204,8 +205,8 @@ def plot_data(DataFrame, title, ps, pe, columns: list):
 
 def plot_single_data(DataFrame, title, ps, pe, columns: list, color):
     """
-    This plots a line plot of the columns of a dataframe with up to 4 columns.  You can indicate exactly which colums you want to plot
-    as well as the start and end points of each plot in the case you want to show a smaller slice of the dataframe.
+    This plots a line plot of the columns of a DataFrame with up to 4 columns.  You can indicate exactly which columns you want to plot
+    as well as the start and end points of each plot in the case you want to show a smaller slice of the DataFrame.
 
     :param DataFrame: The dataFrame to plot
     :param title: Title of the Plot
@@ -228,12 +229,12 @@ def plot_single_data(DataFrame, title, ps, pe, columns: list, color):
 
 def make_waves(wave_array, filename: str, num_cycle=1):
     """
-    This function takes a column from "amp_position" and "amp_velocity" dataframes
-    and uses the datapoints to write a .wav file
+    This function takes a column from "amp_position" and "amp_velocity" DataFrames
+    and uses the values to write a .wav file
 
-    :param wave_array: list of datapoints scaled from -32767 to 32767
+    :param wave_array: list of values scaled from -32767 to 32767
     :param filename: desired name for output .wav file
-    :param num_cycle: optional arguent for number of times to iterate through the cycle, default=1
+    :param num_cycle: optional argument for number of times to iterate through the cycle, default=1
     :return: output .wav file
     """
     sampleRate = 44100.0  # hertz
@@ -254,8 +255,10 @@ def make_waves(wave_array, filename: str, num_cycle=1):
 
 def find_zero_points(DataSeries, column):
     """
-    Takes a single column of a DataFrame and finds the row of any column whose value
-    is zero and returns its index into a list:
+    Takes a single column of a DataFrame and finds specific indexes where the value shifts from positive to negative
+    excluding any index that comes directly after the previous index.  Outputs the first and third "zero point" as a list
+    two indexes.  If the first two indexes are < 900 it finds a larger "wave" by checking the next 3 contiguous zero points in
+    the array.
 
     :param DataSeries: the data series to analize
     :column to look for zero point
@@ -298,14 +301,14 @@ def find_zero_points(DataSeries, column):
 
 def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, data_inc=500):
     """
-    This function takes a text file as output from NASA's Horizon Database and outpus a number of plots
-    .wav files that auralize different aspets of the dataset as sound and plots it as a graph.
-    :param datafile: textfile of data from the Nasa JPL Horizons Database
+    This function takes a text file as output from NASA's Horizons Database and outputs a number of plots
+    .wav files that auralize different aspects of the dataset as sound and plots it as a graph.
+    :param datafile: text file of data from the Nasa JPL Horizons Database
     :param identifier: identifier for all output wave and image files
     :param data_inc: smaller number creates a larger increment for samples
-    :return: various plots and soundfiles
+    :return: various plots and sound files
     """
-    # create a separate dictionary with X,Y,Z postion data
+    # create a separate dictionary with X,Y,Z position data
     XYZ_measurements = create_dict_from_file(datafile, delimiters, first_char, column_names)
     data_length = len(XYZ_measurements)
     data_inc = data_length/data_inc
@@ -316,7 +319,7 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     measurement_DataFrame = convert_measuerment_dict_to_DataFrame(XYZ_measurements)
 
 
-    # Plot movement of the X,Y, and Z coordniates
+    # Plot values of the X,Y, and Z coordniates
     print('Raw Data \n', measurement_DataFrame, '\n')
     plot_data(measurement_DataFrame, 'image/{0} Raw'.format(identifier), 0, data_length, column_names)
 
@@ -325,8 +328,8 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     print(amp)
     plot_data(amp, 'image/{0} as Amplitude'.format(identifier), 0, data_length, column_names)
 
-    # separate out the converted X,Y, and Z coordniate position
-    # amplitude datasets and use to generate soundfiles
+    # separate out the converted X,Y, and Z
+    # amplitude datasets and use to generate sound files
     amp_1 = amp[column_names[0]]
     amp_2 = amp[column_names[1]]
     amp_3 = amp[column_names[2]]
@@ -334,12 +337,12 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     make_waves(amp_2, "sound/{0}_2.wav".format(identifier))
     make_waves(amp_3, "sound/{0}_3.wav".format(identifier))
 
-    # calculate the mean of all 3 rows of the dataframe to create a new column for the mean
-    # velocity and add it to the dataframe
+    # calculate the mean of all 3 rows of the DataFrame to create a new column for the mean
+    # velocity and add it to the DataFrame
     mean_wav = get_mean_wav(amp)
     amp['M'] = mean_wav
     print(column_names + ['M'])
-    # plot the full DataFrame with X, Y, Z and Mean Velocities as well as 3 closer samples
+    # plot the full DataFrame with X, Y, Z and Mean Velocities as well as 3 smaller samples
     plot_data(amp, 'image/{0} Mean as Amplitude'.format(identifier), 0, data_length, (column_names + ['M']))
     plot_data(amp, 'image/{0} Mean as Amplitude Sample 1'.format(identifier), 0, int(data_length/data_inc), (column_names + ['M']))
     plot_data(amp, 'image/{0} Mean as Amplitude Sample 2'.format(identifier), int(data_length/3), int((data_length/3)+(data_length/data_inc)), (column_names + ['M']))
@@ -354,7 +357,7 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
 
     # sample out the first full wave cycle in order to create a waveform that begins and ends on a zero point
     # define zero points of all 4 X, Y, Z and Mean Velocities, using the the
-    # first and 3rd to ientify one "cycle" of the wave from zero through positive
+    # first and 3rd to identify one "cycle" of the wave from zero through positive
     # phase space, back through zero to negative phase space, and back to zero.
     zero_points_X = find_zero_points(amp_M, column_names[0])
     zpx1 = zero_points_X[0]
@@ -369,7 +372,7 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     zpm1 = zero_points_M[0]
     zpm2 = zero_points_M[1]
 
-    # plot the four sampled out full waveforms
+    # plot the four single cycle waveforms
     plot_single_data(amp_M[column_names[0]][zpx1:zpx2], 'image/{0}-Mean as Amplitude Normalized One Cycle_1'.format(identifier),
               0, data_length, (column_names[0]),'Blue')
     plot_single_data(amp_M[column_names[1]][zpy1:zpy2], 'image/{0}-Mean as Amplitude Normalized One Cycle_2'.format(identifier),
@@ -379,19 +382,19 @@ def plots_and_waves(datafile, identifier, delimiters, first_char, column_names, 
     plot_single_data(amp_M['M'][zpm1:zpm2], 'image/{0}-Mean as Amplitude Normalized One Cycle_mean'.format(identifier),
               0, data_length, 'M','Black')
 
-    # create a continuous repeated tone out of each sampled wave
+    # create a continuous repeated tone out of each single cycle wave
     make_waves(amp_M[column_names[0]][zpx1:zpx2], "sound/{0} 1cycle_1.wav".format(identifier), 50)
     make_waves(amp_M[column_names[1]][zpy1:zpy2], "sound/{0} 1cycle_2.wav".format(identifier), 50)
     make_waves(amp_M[column_names[2]][zpz1:zpz2], "sound/{0} 1cycle_3.wav".format(identifier), 50)
     make_waves(amp_M['M'][zpm1:zpm2], "sound/{0} 1cycle_mean.wav".format(identifier), 50)
 
-    # create a continuous repeated tone out of each sampled wave with higher pitch
+    # create a continuous repeated tone out of each single cycle wave with higher pitch
     make_waves(amp_M[column_names[0]][zpx1:zpx2:5], "sound/{0} 1cycle_1_higher.wav".format(identifier), 500)
     make_waves(amp_M[column_names[1]][zpy1:zpy2:5], "sound/{0} 1cycle_2_higher.wav".format(identifier), 500)
     make_waves(amp_M[column_names[2]][zpz1:zpz2:5], "sound/{0} 1cycle_3_higher.wav".format(identifier), 500)
     make_waves(amp_M['M'][zpm1:zpm2:5], "sound/{0} 1cycle_mean_higher.wav".format(identifier), 500)
 
-    # create a continuous repeated tone out of each sampled wave with highest pitch
+    # create a continuous repeated tone out of each single cycle wave with highest pitch
     make_waves(amp_M[column_names[0]][zpx1:zpx2:30], "sound/{0} 1cycle_1_highest.wav".format(identifier), 5000)
     make_waves(amp_M[column_names[1]][zpy1:zpy2:30], "sound/{0} 1cycle_2_highest.wav".format(identifier), 5000)
     make_waves(amp_M[column_names[2]][zpz1:zpz2:30], "sound/{0} 1cycle_3_highest.wav".format(identifier), 5000)
@@ -410,37 +413,38 @@ if __name__ == '__main__':
     """
     How to call:  
     
-    The proram can be called by simply replacing the default parameters below with your own parameters.  
-    
-    plots_and_waves(datafile, identifier, delimiters, first_char, column_names, data_inc=500):
-     make sure to check the origial datafile you are using to make sure it is a JPL Horizons datafile.  Lines will be formatted like so:
-    
-    2458343.500000000 = A.D. 2018-Aug-13 00:00:00.0000 TDB 
-     X =-3.126133124396237E-03 Y =-3.561447762865196E-03 Z =-6.934630025140552E-04
-     VX=-4.618261087536135E-03 VY=-5.370670708376926E-03 VZ=-9.784335339083530E-04
-     LT= 2.766075923986267E-05 RG= 4.789311998076623E-03 RR= 7.149914144709729E-03
-    2458343.541666667 = A.D. 2018-Aug-13 01:00:00.0000 TDB 
-     X =-3.318537227417918E-03 Y =-3.785200789771382E-03 Z =-7.342262242201711E-04
-     VX=-4.617155482195074E-03 VY=-5.369496986640906E-03 VZ=-9.782056435918771E-04
-     LT= 2.938117068112179E-05 RG= 5.087192005121990E-03 RR= 7.148354295757034E-03
-    etc.............
-    
-    You may only extract the values from one row and must extract all 3 values from each row.  
-    to exract the X,Y and Z positoin data in this example: 
-    delimiter = 'X =|Y =|Z ='
-    first_char = 'X'
-    column_names = ['X ', 'Y ', 'Z ']
-    
-    do extract the VX, VY, and VZ velocity data:
-    delimiter = 'VX=|VY=|VZ='
-    first_char = 'V'
-    column_names = ['VX', 'VY', 'VZ']
-    
-    note that each individual entry in "delimiter" and each string in the "colunm_name"
-    list require two spaces wtih the second space left blank in the case of a single character
-    item. 
-    
-    The last arguement "data_inc" only affects the size of the "samples" that are plotted.  
+    The program can be called by simply replacing the default parameters below with your own parameters.  
+
+plots_and_waves(datafile, identifier, delimiters, first_char, column_names, data_inc=500):
+ make sure to check the original data file you are using to make sure it is a JPL Horizons datafile.  Lines will be formatted like so:
+
+2458343.500000000 = A.D. 2018-Aug-13 00:00:00.0000 TDB 
+ X =-3.126133124396237E-03 Y =-3.561447762865196E-03 Z =-6.934630025140552E-04
+ VX=-4.618261087536135E-03 VY=-5.370670708376926E-03 VZ=-9.784335339083530E-04
+ LT= 2.766075923986267E-05 RG= 4.789311998076623E-03 RR= 7.149914144709729E-03
+2458343.541666667 = A.D. 2018-Aug-13 01:00:00.0000 TDB 
+ X =-3.318537227417918E-03 Y =-3.785200789771382E-03 Z =-7.342262242201711E-04
+ VX=-4.617155482195074E-03 VY=-5.369496986640906E-03 VZ=-9.782056435918771E-04
+ LT= 2.938117068112179E-05 RG= 5.087192005121990E-03 RR= 7.148354295757034E-03
+etc.............
+
+You may only extract the values from one row and must extract all 3 values from each row.  
+to extract the X,Y and Z position data in this example: 
+delimiter = 'X =|Y =|Z ='
+first_char = 'X'
+column_names = ['X ', 'Y ', 'Z ']
+
+do extract the VX, VY, and VZ velocity data:
+delimiter = 'VX=|VY=|VZ='
+first_char = 'V'
+column_names = ['VX', 'VY', 'VZ']
+
+note that each individual entry in "delimiter" and each string in the "colunm_name"
+list require two spaces with the second space left blank in the case of a single character
+item. 
+
+The last argument "data_inc" only affects the size of the "samples" that are plotted.  
+  
     """
 
 
