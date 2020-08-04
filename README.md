@@ -58,16 +58,23 @@ We will need to take special care to note the exact header for each dataset ad t
 For example, in the first row, the headers are 'X =' , 'Y =' , and 'Z =' respectively while the second row is 'VX=', 'VY=' etc.....
 This is important because it will determine the exact syntax needed to run the program properly.
 
+# Running Probe_Vector_Auralization.py
+
+Once you have gotten a valid dataset from the Horizons Database and have it as a text file in a valid filepath (in this case, the same folder as the main file), you are ready to run the program! 
+
+To run the program, simply open Probe_Vector_Auraliation.py in Pycharm and run.  You will need to set the text file name, the identifier, the delimiters, the first_char, and the list of column names you want to give the data.  There are more detailed instructions in the docstrings.
+
+![picture](CallingProbe_Vector_Auralization.png)
+
+This example will run it with the default data file and parameters which should all be in the project directory.  You can then modify the parameters used to call the function.  Instructions are in the docstrings of the main function module.  If you can't get it to run, it likely means there is either a typo in the name of the data file or in either the ""
+
+
 # understanding the output
 
 running Probe_Vector_Auralizaion.py will generate a number of plots (.jpg) as well as sample audio files (.wav).  Each generated file name starts with an identifier that you set in the main call function.  This helps you kep track of what you are seeing and hearing down the road.  
 
 The image files are as follows:
 
-
-# Running Probe_Vector_Auralization.py
-
-To run the program, simply open Probe_Vector_Auraliation.py in Pycharm and run.  This will run it with the default data file and parameters which should all be in the project directory.  You can then modify the parameters used to call the function.  Instructions are in the docstrings of the main function module.  If you can't get it to run, it likely means there is either a typo in the name of the data file or in either the ""
 
 Raw DATA
 ![picture](image/Phobos Measurements Raw.jpg)
