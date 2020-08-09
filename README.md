@@ -77,7 +77,7 @@ The image files are as follows:
 
 
 Raw DATA
-![picture](image/Phobos Measurements Raw.jpg)
+![picture](image/PhobosMeasurementsRaw.jpg)
  
 
 Raw DATA converted into amplitude numbers useful to generate .wave files
