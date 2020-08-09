@@ -82,18 +82,18 @@ Raw DATA
 
 Raw DATA converted into amplitude numbers useful to generate .wave files
 
-![picture](image/Phobos Measurements as Amplitude.jpg)
+![picture](image/PhobosMeasurementsasAmplitude.jpg)
 
 The amplitude data with the addition of the "mean" of all 3 amplitudes (this is the equivalent of additive synthesis as all 3 "waves" coalesce to form one wave)
-![picture](image/Phobos Measurements-Mean as Amplitude Normalized.jpg)
+![picture](image/PhobosMeasurements-MeanasAmplitudeNormalized.jpg)
 
 Close up "SNAPSHOTS of the Amplitude Data"
 
-![picture](image/Phobos Measurements Mean as Amplitude Sample 1.jpg) ![picture](image/Phobos Measurements Mean as Amplitude Sample 2.jpg) ![picture](image/Phobos Measurements Mean as Amplitude Sample 3.jpg)
+![picture](image/PhobosMeasurementsMeanasAmplitudeSample1.jpg) ![picture](image/PhobosMeasurementsMeanasAmplitudeSample2.jpg) ![picture](image/PhobosMeasurementsMeanasAmplitudeSample3.jpg)
 
 And Finally, the program finds the first complete single cycle of a wave by finding its zero crossing points and plotting just that wave.  These waveforms are then auralized both as a file in which this single cycle is repeated thousands of times to create a tone as well as a single cycle (which will be later useful for further manipulation in MAX/MSP).  
 
-![picture](image/Phobos Measurements-Mean as Amplitude Normalized One Cycle_1.jpg) ![picture](image/Phobos Measurements-Mean as Amplitude Normalized One Cycle_2.jpg) ![picture](image/Phobos Measurements-Mean as Amplitude Normalized One Cycle_3.jpg) ![picture](image/Phobos Measurements-Mean as Amplitude Normalized One Cycle_mean.jpg)
+![picture](image/PhobosMeasurements-MeanasAmplitudeNormalizedOneCycle_1.jpg) ![picture](image/PhobosMeasurements-MeanasAmplitudeNormalizedOneCycle_2.jpg) ![picture](image/PhobosMeasurements-MeanasAmplitudeNormalizedOneCycle_3.jpg) ![picture](image/PhobosMeasurements-MeanasAmplitudeNormalizedOneCycle_mean.jpg)
 
 If we look closely at the 4 one cycle examples and compare then to the "Phobos Measurements Mean as Amplitude Normalized", you will see that each 1 2 and 3 correlates directly to X, Y, and Z and the mean correlates directly to the mean.  
 This is because the Phobos probe's movement is generally moving farther away from a center point so then entire "wave" only crosses the center point once.  Therefor, it is impossible to isolate a single "cycle with these waves so the single cycles 
@@ -101,21 +101,21 @@ simply output as the full cycle.
 
 In contrast, if we look at the "ParkerSolarProbe" velocity data, we see that it has much more variation.  
 
-![picture](image/Parker Velocities-Mean as Amplitude Normalized.jpg)
-![picture](image/Parker Velocities-Mean as Amplitude Normalized One Cycle_1.jpg) ![picture](image/Parker Velocities-Mean as Amplitude Normalized One Cycle_2.jpg) ![picture](image/Parker Velocities-Mean as Amplitude Normalized One Cycle_3.jpg) ![picture](image/Parker Velocities-Mean as Amplitude Normalized One Cycle_mean.jpg)
+![picture](image/ParkerVelocities-MeanasAmplitudeNormalized.jpg)
+![picture](image/ParkerVelocities-MeanasAmplitudeNormalizedOneCycle_1.jpg) ![picture](image/ParkerVelocities-MeanasAmplitudeNormalizedOne Cycle_2.jpg) ![picture](image/ParkerVelocities-MeanasAmplitudeNormalizedOneCycle_3.jpg) ![picture](image/ParkerVelocities-MeanasAmplitudeNormalizedOneCycle_mean.jpg)
 
 If we just look at the "-Mean as Amplitude Normalized" plot for all 4 example situations, we can see that velocities tend to have a greater fluctuation than position in both cases and that the Parker Solar Probe fluctuates quite a bit more and much less regularly than Phobos.  This gives a slightly more interesting and rich sound to the wave file itself. 
 
-![picture](image/Phobos Measurements-Mean as Amplitude Normalized.jpg)
-![picture](image/Phobos Velocities-Mean as Amplitude Normalized.jpg)
-![picture](image/Parker Measurements-Mean as Amplitude Normalized.jpg)
-![picture](image/Parker Velocities-Mean as Amplitude Normalized.jpg)
+![picture](image/PhobosMeasurements-MeanasAmplitudeNormalized.jpg)
+![picture](image/PhobosVelocities-MeanasAmplitudeNormalized.jpg)
+![picture](image/ParkerMeasurements-MeanasAmplitudeNormalized.jpg)
+![picture](image/ParkerVelocities-MeanasAmplitudeNormalized.jpg)
 
 It should be noted that although the Phobos data plot appears to be simply moving very slowly in a straight line, looking more closely at the samples for each gives us a bit of a different picture.  
 
-![picture](image/Phobos Velocities Mean as Amplitude Sample 1.jpg)
-![picture](image/Phobos Velocities Mean as Amplitude Sample 2.jpg)
-![picture](image/Phobos Velocities Mean as Amplitude Sample 3.jpg)
+![picture](image/PhobosVelocitiesMeanasAmplitudeSample1.jpg)
+![picture](image/PhobosVelocitiesMeanasAmplitudeSample2.jpg)
+![picture](image/PhobosVelocitiesMeanasAmplitudeSample3.jpg)
 
 Though this is very interesting visually, the end result of these four different "waveforms" is an identical tone, just realized at different amplitude depending on the minimum and maximum "range" of each cycle on the X axis.  It doesn't matter if it moves up and down over time, it is the amount of energy being shifted into the positive and negative phase space that is important to sound. 
 
